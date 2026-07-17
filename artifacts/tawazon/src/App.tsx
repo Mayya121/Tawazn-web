@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/contexts/language-context';
 import { UserDataProvider } from '@/contexts/user-data-context';
+import { ToastProvider } from '@/contexts/toast-context';
 import { Navbar } from '@/components/navbar';
 import Home from '@/pages/home';
 import Dashboard from '@/pages/dashboard';
@@ -32,13 +33,15 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <UserDataProvider>
-          <div style={{ minHeight: '100vh', backgroundColor: '#03060d', color: 'white' }}>
-            <BackgroundEffects />
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-              <Navbar />
-              <Router />
-            </WouterRouter>
-          </div>
+          <ToastProvider>
+            <div style={{ minHeight: '100vh', backgroundColor: '#03060d', color: 'white' }}>
+              <BackgroundEffects />
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+                <Navbar />
+                <Router />
+              </WouterRouter>
+            </div>
+          </ToastProvider>
         </UserDataProvider>
       </LanguageProvider>
     </QueryClientProvider>

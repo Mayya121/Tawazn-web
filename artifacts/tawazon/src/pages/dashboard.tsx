@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/language-context';
 import { useUserData } from '@/contexts/user-data-context';
+import { useToast } from '@/contexts/toast-context';
 import {
   BrainCircuit, TrendingDown, Trophy, Target, Zap, CloudRain, Coffee,
   Smile, Meh, Frown, ArrowLeft, ArrowRight, BarChart2, Shield,
-  Plus, Trash2, X, ShoppingBag, Car, Utensils, Gamepad2, BookOpen, MoreHorizontal
+  Plus, Trash2, X, ShoppingBag, Car, Utensils, Gamepad2, BookOpen, MoreHorizontal, FlaskConical
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
@@ -29,22 +30,44 @@ const MOODS = {
 /* ─── CATEGORIES ────────────────────────────────────────────────────────── */
 const CATEGORIES = {
   ar: [
-    { id: 'food',       label: 'طعام ومشروبات', icon: Utensils,    color: '#f97316' },
-    { id: 'shopping',   label: 'تسوق',          icon: ShoppingBag, color: '#b44dff' },
-    { id: 'transport',  label: 'مواصلات',       icon: Car,         color: '#00f0ff' },
-    { id: 'entertainment', label: 'ترفيه',      icon: Gamepad2,    color: '#fbbf24' },
-    { id: 'education',  label: 'تعليم',         icon: BookOpen,    color: '#22c55e' },
-    { id: 'other',      label: 'أخرى',          icon: MoreHorizontal, color: '#6b7280' },
+    { id: 'food',          label: 'طعام ومشروبات', icon: Utensils,       color: '#f97316' },
+    { id: 'shopping',      label: 'تسوق',          icon: ShoppingBag,    color: '#b44dff' },
+    { id: 'transport',     label: 'مواصلات',       icon: Car,            color: '#00f0ff' },
+    { id: 'entertainment', label: 'ترفيه',          icon: Gamepad2,       color: '#fbbf24' },
+    { id: 'education',     label: 'تعليم',         icon: BookOpen,       color: '#22c55e' },
+    { id: 'other',         label: 'أخرى',          icon: MoreHorizontal, color: '#6b7280' },
   ],
   en: [
-    { id: 'food',       label: 'Food & Drinks',  icon: Utensils,    color: '#f97316' },
-    { id: 'shopping',   label: 'Shopping',       icon: ShoppingBag, color: '#b44dff' },
-    { id: 'transport',  label: 'Transport',      icon: Car,         color: '#00f0ff' },
-    { id: 'entertainment', label: 'Entertainment', icon: Gamepad2,  color: '#fbbf24' },
-    { id: 'education',  label: 'Education',      icon: BookOpen,    color: '#22c55e' },
-    { id: 'other',      label: 'Other',          icon: MoreHorizontal, color: '#6b7280' },
+    { id: 'food',          label: 'Food & Drinks',  icon: Utensils,       color: '#f97316' },
+    { id: 'shopping',      label: 'Shopping',       icon: ShoppingBag,    color: '#b44dff' },
+    { id: 'transport',     label: 'Transport',      icon: Car,            color: '#00f0ff' },
+    { id: 'entertainment', label: 'Entertainment',  icon: Gamepad2,       color: '#fbbf24' },
+    { id: 'education',     label: 'Education',      icon: BookOpen,       color: '#22c55e' },
+    { id: 'other',         label: 'Other',          icon: MoreHorizontal, color: '#6b7280' },
   ],
 };
+
+/* ─── DEMO DATA ─────────────────────────────────────────────────────────── */
+const DEMO_ENTRIES_AR = [
+  { amount: 85,   category: 'food',          mood: 'happy',    note: 'إفطار مع الأصدقاء' },
+  { amount: 320,  category: 'shopping',      mood: 'stressed', note: 'تسوق بعد يوم صعب' },
+  { amount: 45,   category: 'transport',     mood: 'neutral',  note: 'أوبر للجامعة' },
+  { amount: 210,  category: 'entertainment', mood: 'bored',    note: 'اشتراك نتفليكس وألعاب' },
+  { amount: 150,  category: 'food',          mood: 'sad',      note: 'طلب إيصال' },
+  { amount: 480,  category: 'shopping',      mood: 'stressed', note: 'ملابس جديدة — كنت متوتراً' },
+  { amount: 60,   category: 'education',     mood: 'happy',    note: 'كتاب جديد' },
+  { amount: 95,   category: 'food',          mood: 'neutral',  note: 'غداء مع الزملاء' },
+];
+const DEMO_ENTRIES_EN = [
+  { amount: 85,   category: 'food',          mood: 'happy',    note: 'Breakfast with friends' },
+  { amount: 320,  category: 'shopping',      mood: 'stressed', note: 'Shopping after a tough day' },
+  { amount: 45,   category: 'transport',     mood: 'neutral',  note: 'Uber to campus' },
+  { amount: 210,  category: 'entertainment', mood: 'bored',    note: 'Netflix & gaming subscriptions' },
+  { amount: 150,  category: 'food',          mood: 'sad',      note: 'Late night delivery' },
+  { amount: 480,  category: 'shopping',      mood: 'stressed', note: 'New clothes — was stressed' },
+  { amount: 60,   category: 'education',     mood: 'happy',    note: 'New book' },
+  { amount: 95,   category: 'food',          mood: 'neutral',  note: 'Lunch with colleagues' },
+];
 
 /* ─── HELPERS ───────────────────────────────────────────────────────────── */
 function fmtDate(iso: string, lang: string) {
@@ -55,6 +78,7 @@ function fmtDate(iso: string, lang: string) {
 /* ─── ADD EXPENSE MODAL ─────────────────────────────────────────────────── */
 function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string }) {
   const { addEntry } = useUserData();
+  const { showToast } = useToast();
   const moods = MOODS[lang as 'ar' | 'en'];
   const cats  = CATEGORIES[lang as 'ar' | 'en'];
   const [amount,   setAmount]   = useState('');
@@ -68,9 +92,10 @@ function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string 
   const handleSubmit = () => {
     const val = parseFloat(amount.replace(/,/g, '.'));
     if (!val || val <= 0) { setError(lang === 'ar' ? 'أدخل مبلغاً صحيحاً' : 'Enter a valid amount'); return; }
-    if (!category)        { setError(lang === 'ar' ? 'اختر الفئة'         : 'Choose a category');    return; }
-    if (!mood)            { setError(lang === 'ar' ? 'اختر حالتك المزاجية' : 'Choose your mood');     return; }
+    if (!category)        { setError(lang === 'ar' ? 'اختر الفئة' : 'Choose a category'); return; }
+    if (!mood)            { setError(lang === 'ar' ? 'اختر حالتك المزاجية' : 'Choose your mood'); return; }
     addEntry({ amount: val, category, mood, note });
+    showToast(lang === 'ar' ? `✅ تم تسجيل ${val.toLocaleString()} ر.س  +80 XP` : `✅ Logged ${val.toLocaleString()} SAR  +80 XP`, 'xp');
     onClose();
   };
 
@@ -78,24 +103,13 @@ function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string 
   const inputStyle: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 15, outline: 'none', boxSizing: 'border-box' };
 
   return (
-    /* Backdrop */
-    <div
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{ background: '#0d1117', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 28, padding: 32, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}
-      >
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#0d1117', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 28, padding: 32, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
           <div>
-            <h2 style={{ fontWeight: 800, fontSize: 20, color: 'white', marginBottom: 4 }}>
-              {lang === 'ar' ? 'تسجيل مصروف جديد' : 'Log New Expense'}
-            </h2>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
-              {lang === 'ar' ? 'أدخل تفاصيل المصروف وحالتك المزاجية' : 'Enter expense details and your current mood'}
-            </p>
+            <h2 style={{ fontWeight: 800, fontSize: 20, color: 'white', marginBottom: 4 }}>{lang === 'ar' ? 'تسجيل مصروف جديد' : 'Log New Expense'}</h2>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>{lang === 'ar' ? 'أدخل تفاصيل المصروف وحالتك المزاجية' : 'Enter expense details and your current mood'}</p>
           </div>
           <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <X className="w-4 h-4" />
@@ -105,15 +119,9 @@ function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string 
         {/* Amount */}
         <div style={{ marginBottom: 22 }}>
           <label style={labelStyle}>{lang === 'ar' ? 'المبلغ (ريال سعودي)' : 'Amount (SAR)'}</label>
-          <input
-            type="number"
-            min="0"
-            placeholder={lang === 'ar' ? '٠.٠٠' : '0.00'}
-            value={amount}
-            onChange={e => setAmount(e.target.value)}
-            style={{ ...inputStyle, fontSize: 22, fontWeight: 700 }}
-            dir="ltr"
-          />
+          <input type="number" min="0" placeholder={lang === 'ar' ? '٠.٠٠' : '0.00'}
+            value={amount} onChange={e => setAmount(e.target.value)}
+            style={{ ...inputStyle, fontSize: 22, fontWeight: 700 }} dir="ltr" />
         </div>
 
         {/* Category */}
@@ -121,11 +129,8 @@ function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string 
           <label style={labelStyle}>{lang === 'ar' ? 'الفئة' : 'Category'}</label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {cats.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setCategory(cat.id)}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 8px', borderRadius: 12, background: category === cat.id ? `${cat.color}20` : 'rgba(255,255,255,0.04)', border: category === cat.id ? `2px solid ${cat.color}` : '2px solid transparent', cursor: 'pointer', transition: 'all 0.15s' }}
-              >
+              <button key={cat.id} onClick={() => setCategory(cat.id)}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 8px', borderRadius: 12, background: category === cat.id ? `${cat.color}20` : 'rgba(255,255,255,0.04)', border: category === cat.id ? `2px solid ${cat.color}` : '2px solid transparent', cursor: 'pointer', transition: 'all 0.15s' }}>
                 <cat.icon className="w-5 h-5" style={{ color: category === cat.id ? cat.color : 'rgba(255,255,255,0.5)' }} />
                 <span style={{ fontSize: 11, color: category === cat.id ? cat.color : 'rgba(255,255,255,0.55)', fontWeight: category === cat.id ? 700 : 400, textAlign: 'center' }}>{cat.label}</span>
               </button>
@@ -138,11 +143,8 @@ function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string 
           <label style={labelStyle}>{lang === 'ar' ? 'حالتك المزاجية الآن' : 'Your Mood Right Now'}</label>
           <div style={{ display: 'flex', gap: 8 }}>
             {moods.map(m => (
-              <button
-                key={m.id}
-                onClick={() => setMood(m.id)}
-                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 4px', borderRadius: 12, background: mood === m.id ? `${m.color}18` : 'rgba(255,255,255,0.03)', border: mood === m.id ? `2px solid ${m.color}` : '2px solid transparent', cursor: 'pointer', transition: 'all 0.15s' }}
-              >
+              <button key={m.id} onClick={() => setMood(m.id)}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 4px', borderRadius: 12, background: mood === m.id ? `${m.color}18` : 'rgba(255,255,255,0.03)', border: mood === m.id ? `2px solid ${m.color}` : '2px solid transparent', cursor: 'pointer', transition: 'all 0.15s' }}>
                 <m.icon className="w-5 h-5" style={{ color: mood === m.id ? m.color : 'rgba(255,255,255,0.45)' }} />
                 <span style={{ fontSize: 10, color: mood === m.id ? m.color : 'rgba(255,255,255,0.45)', fontWeight: mood === m.id ? 700 : 400 }}>{m.label}</span>
               </button>
@@ -159,25 +161,16 @@ function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string 
         {/* Note */}
         <div style={{ marginBottom: 24 }}>
           <label style={labelStyle}>{lang === 'ar' ? 'ملاحظة (اختياري)' : 'Note (optional)'}</label>
-          <textarea
-            placeholder={lang === 'ar' ? 'لماذا أنفقت هذا المبلغ؟' : 'Why did you spend this?'}
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            rows={2}
-            style={{ ...inputStyle, resize: 'none', fontFamily: 'inherit' }}
-          />
+          <textarea placeholder={lang === 'ar' ? 'لماذا أنفقت هذا المبلغ؟' : 'Why did you spend this?'}
+            value={note} onChange={e => setNote(e.target.value)} rows={2}
+            style={{ ...inputStyle, resize: 'none', fontFamily: 'inherit' }} />
         </div>
 
         {error && (
-          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#f87171' }}>
-            {error}
-          </div>
+          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#f87171' }}>{error}</div>
         )}
 
-        <button
-          onClick={handleSubmit}
-          style={{ width: '100%', background: 'linear-gradient(135deg, #00f0ff, #0ea5e9)', color: '#03060d', border: 'none', borderRadius: 14, padding: '14px', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}
-        >
+        <button onClick={handleSubmit} style={{ width: '100%', background: 'linear-gradient(135deg, #00f0ff, #0ea5e9)', color: '#03060d', border: 'none', borderRadius: 14, padding: '14px', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>
           {lang === 'ar' ? 'تسجيل المصروف' : 'Log Expense'}
         </button>
       </div>
@@ -189,14 +182,15 @@ function AddExpenseModal({ onClose, lang }: { onClose: () => void; lang: string 
 export default function Dashboard() {
   const { lang, dir } = useLanguage();
   const [, navigate] = useLocation();
-  const { entries, totalSpent, emotionalSpendingPct, removeEntry } = useUserData();
+  const { entries, totalSpent, emotionalSpendingPct, removeEntry, addEntry } = useUserData();
+  const { showToast } = useToast();
   const [showAdd, setShowAdd] = useState(false);
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
 
   const cats   = CATEGORIES[lang as 'ar' | 'en'];
   const getCat = (id: string) => cats.find(c => c.id === id) ?? cats[cats.length - 1];
 
-  const recentEntries = entries.slice(0, 5);
+  const recentEntries = entries.slice(0, 6);
   const hasData = entries.length > 0;
 
   const xp      = Math.min(2000, entries.length * 80 + 200);
@@ -204,6 +198,19 @@ export default function Dashboard() {
   const xpPct   = (xp / maxXp) * 100;
   const level   = Math.floor(xp / 500) + 1;
   const streak  = Math.min(entries.length + 1, 30);
+
+  const loadDemo = () => {
+    const demos = lang === 'ar' ? DEMO_ENTRIES_AR : DEMO_ENTRIES_EN;
+    demos.forEach((d, i) => {
+      setTimeout(() => addEntry(d), i * 30);
+    });
+    showToast(lang === 'ar' ? '🧪 تم تحميل ٨ مصروفات تجريبية!' : '🧪 Loaded 8 demo expenses!', 'info');
+  };
+
+  const handleDelete = (id: string) => {
+    removeEntry(id);
+    showToast(lang === 'ar' ? 'تم حذف المصروف' : 'Expense deleted', 'warning');
+  };
 
   return (
     <div style={{ minHeight: '100vh', padding: '100px 24px 60px', maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -219,13 +226,20 @@ export default function Dashboard() {
             {lang === 'ar' ? 'سجّل مصروفاتك وتتبّع حالتك المزاجية' : 'Log your expenses and track your emotional patterns'}
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#00f0ff', color: '#03060d', border: 'none', borderRadius: 14, padding: '12px 22px', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: '0 0 20px rgba(0,240,255,0.25)' }}
-        >
-          <Plus className="w-5 h-5" />
-          {lang === 'ar' ? 'تسجيل مصروف' : 'Log Expense'}
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {!hasData && (
+            <button onClick={loadDemo}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '12px 18px', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
+              <FlaskConical className="w-4 h-4" />
+              {lang === 'ar' ? 'بيانات تجريبية' : 'Demo Data'}
+            </button>
+          )}
+          <button onClick={() => setShowAdd(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#00f0ff', color: '#03060d', border: 'none', borderRadius: 14, padding: '12px 22px', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: '0 0 20px rgba(0,240,255,0.25)' }}>
+            <Plus className="w-5 h-5" />
+            {lang === 'ar' ? 'تسجيل مصروف' : 'Log Expense'}
+          </button>
+        </div>
       </div>
 
       {/* XP Bar */}
@@ -238,9 +252,7 @@ export default function Dashboard() {
             <span style={{ fontWeight: 700, color: 'white', fontSize: 13 }}>
               {lang === 'ar' ? `المستوى ${level}: الوعي المالي` : `Level ${level}: Financial Awareness`}
             </span>
-            <span style={{ color: '#00f0ff', fontWeight: 700, fontSize: 12 }}>
-              {xp} / {maxXp} XP
-            </span>
+            <span style={{ color: '#00f0ff', fontWeight: 700, fontSize: 12 }}>{xp} / {maxXp} XP</span>
           </div>
           <div style={{ height: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${xpPct}%`, background: 'linear-gradient(90deg, #00f0ff, #b44dff)', borderRadius: 4, transition: 'width 0.8s ease', boxShadow: '0 0 10px rgba(0,240,255,0.5)' }} />
@@ -301,13 +313,9 @@ export default function Dashboard() {
         {/* Recent Entries */}
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: 26 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h2 style={{ fontWeight: 700, fontSize: 16, color: 'white' }}>
-              {lang === 'ar' ? 'آخر المصروفات' : 'Recent Expenses'}
-            </h2>
-            <button
-              onClick={() => navigate('/insights')}
-              style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#00f0ff', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
-            >
+            <h2 style={{ fontWeight: 700, fontSize: 16, color: 'white' }}>{lang === 'ar' ? 'آخر المصروفات' : 'Recent Expenses'}</h2>
+            <button onClick={() => navigate('/insights')}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#00f0ff', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
               {lang === 'ar' ? 'التحليل الكامل' : 'Full Analysis'}
               <ArrowIcon className="w-3 h-3" />
             </button>
@@ -318,15 +326,20 @@ export default function Dashboard() {
               <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(0,240,255,0.08)', border: '1px dashed rgba(0,240,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <Plus className="w-6 h-6" style={{ color: '#00f0ff', opacity: 0.6 }} />
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.6 }}>
-                {lang === 'ar' ? 'لم تسجّل أي مصروف بعد.\nاضغط "تسجيل مصروف" لتبدأ.' : 'No expenses logged yet.\nClick "Log Expense" to start.'}
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+                {lang === 'ar' ? 'لم تسجّل أي مصروف بعد.' : 'No expenses logged yet.'}
               </p>
-              <button
-                onClick={() => setShowAdd(true)}
-                style={{ marginTop: 16, background: 'rgba(0,240,255,0.1)', border: '1px solid rgba(0,240,255,0.3)', borderRadius: 10, padding: '10px 20px', color: '#00f0ff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
-              >
-                {lang === 'ar' ? '+ أضف أول مصروف' : '+ Add First Expense'}
-              </button>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button onClick={() => setShowAdd(true)}
+                  style={{ background: '#00f0ff', border: 'none', borderRadius: 10, padding: '10px 18px', color: '#03060d', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                  {lang === 'ar' ? '+ أضف أول مصروف' : '+ Add First Expense'}
+                </button>
+                <button onClick={loadDemo}
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '10px 18px', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <FlaskConical className="w-3 h-3" />
+                  {lang === 'ar' ? 'تجربة البيانات التجريبية' : 'Try Demo Data'}
+                </button>
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -350,42 +363,37 @@ export default function Dashboard() {
                     </div>
                     <div style={{ textAlign: 'end', flexShrink: 0 }}>
                       <div style={{ fontWeight: 700, color: 'white', fontSize: 14 }}>{entry.amount.toLocaleString()} {lang === 'ar' ? 'ر.س' : 'SAR'}</div>
-                      <button
-                        onClick={() => removeEntry(entry.id)}
+                      <button onClick={() => handleDelete(entry.id)}
                         style={{ marginTop: 4, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', color: 'rgba(255,255,255,0.2)' }}
-                        title={lang === 'ar' ? 'حذف' : 'Delete'}
-                      >
+                        title={lang === 'ar' ? 'حذف' : 'Delete'}>
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
                 );
               })}
-              {entries.length > 5 && (
+              {entries.length > 6 && (
                 <button onClick={() => navigate('/insights')} style={{ color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, padding: '6px 0', textAlign: 'center' }}>
-                  {lang === 'ar' ? `+ ${entries.length - 5} مصروف آخر — عرض الكل` : `+ ${entries.length - 5} more — view all`}
+                  {lang === 'ar' ? `+ ${entries.length - 6} مصروف آخر — عرض الكل` : `+ ${entries.length - 6} more — view all`}
                 </button>
               )}
             </div>
           )}
         </div>
 
-        {/* AI Mood Insight card */}
+        {/* AI Snapshot */}
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: 26, display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <h2 style={{ fontWeight: 700, fontSize: 16, color: 'white' }}>
-            {lang === 'ar' ? 'رؤية الذكاء الاصطناعي' : 'AI Snapshot'}
-          </h2>
+          <h2 style={{ fontWeight: 700, fontSize: 16, color: 'white' }}>{lang === 'ar' ? 'رؤية الذكاء الاصطناعي' : 'AI Snapshot'}</h2>
 
           {!hasData ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '30px 10px', gap: 16 }}>
               <BrainCircuit className="w-14 h-14" style={{ color: '#00f0ff', opacity: 0.3 }} strokeWidth={1} />
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.6, maxWidth: 220 }}>
-                {lang === 'ar' ? 'سجّل مصروفاتك وسيحلل الذكاء الاصطناعي أنماط إنفاقك العاطفي.' : 'Log your expenses and AI will analyze your emotional spending patterns.'}
+                {lang === 'ar' ? 'سجّل مصروفاتك وسيحلل الذكاء الاصطناعي أنماط إنفاقك.' : 'Log your expenses and AI will analyze your emotional spending patterns.'}
               </p>
             </div>
           ) : (
             <>
-              {/* Mood breakdown */}
               <div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 12, fontWeight: 600 }}>
                   {lang === 'ar' ? 'توزيع حالتك المزاجية' : 'Mood Distribution'}
@@ -411,7 +419,6 @@ export default function Dashboard() {
                 })()}
               </div>
 
-              {/* Insight message */}
               {(() => {
                 const moodMap = entries.reduce((a, e) => { a[e.mood] = (a[e.mood] || 0) + e.amount; return a; }, {} as Record<string, number>);
                 const topMood = Object.entries(moodMap).sort((a, b) => b[1] - a[1])[0];
@@ -424,9 +431,7 @@ export default function Dashboard() {
                     <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                       <BrainCircuit className="w-4 h-4" style={{ color: moodObj.color, flexShrink: 0, marginTop: 2 }} />
                       <div>
-                        <div style={{ fontWeight: 700, color: moodObj.color, fontSize: 12, marginBottom: 4 }}>
-                          {lang === 'ar' ? 'رؤية الذكاء الاصطناعي' : 'AI Insight'}
-                        </div>
+                        <div style={{ fontWeight: 700, color: moodObj.color, fontSize: 12, marginBottom: 4 }}>{lang === 'ar' ? 'رؤية الذكاء الاصطناعي' : 'AI Insight'}</div>
                         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.55 }}>{moodObj.aiTip}</p>
                       </div>
                     </div>
@@ -434,10 +439,8 @@ export default function Dashboard() {
                 );
               })()}
 
-              <button
-                onClick={() => navigate('/insights')}
-                style={{ width: '100%', background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.2)', borderRadius: 12, padding: '11px', color: '#00f0ff', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-              >
+              <button onClick={() => navigate('/insights')}
+                style={{ width: '100%', background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.2)', borderRadius: 12, padding: '11px', color: '#00f0ff', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <BarChart2 className="w-4 h-4" />
                 {lang === 'ar' ? 'عرض التحليل الكامل' : 'View Full Analysis'}
               </button>
