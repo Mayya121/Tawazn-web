@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { LanguageProvider } from '@/contexts/language-context';
+import { UserDataProvider } from '@/contexts/user-data-context';
 import { Navbar } from '@/components/navbar';
 import Home from '@/pages/home';
 import Dashboard from '@/pages/dashboard';
@@ -18,7 +19,7 @@ function Router() {
       <Route path="/insights" component={Insights} />
       <Route path="/challenges" component={Challenges} />
       <Route>
-        <div className="min-h-screen flex items-center justify-center text-xl" style={{ color: 'white' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 20 }}>
           404 | Page Not Found
         </div>
       </Route>
@@ -30,13 +31,15 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <div style={{ minHeight: '100vh', backgroundColor: '#03060d', color: 'white' }}>
-          <BackgroundEffects />
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-            <Navbar />
-            <Router />
-          </WouterRouter>
-        </div>
+        <UserDataProvider>
+          <div style={{ minHeight: '100vh', backgroundColor: '#03060d', color: 'white' }}>
+            <BackgroundEffects />
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+              <Navbar />
+              <Router />
+            </WouterRouter>
+          </div>
+        </UserDataProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );
