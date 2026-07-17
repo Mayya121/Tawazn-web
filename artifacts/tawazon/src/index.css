@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700;800&display=swap');
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -72,31 +72,91 @@
   --radius: 1rem;
 }
 
-html[dir="rtl"] {
-  --app-font-sans: 'Tajawal', sans-serif;
-}
+html[dir="rtl"] { --app-font-sans: 'Tajawal', sans-serif; }
+html[dir="ltr"] { --app-font-sans: 'Outfit', sans-serif; }
 
-html[dir="ltr"] {
-  --app-font-sans: 'Outfit', sans-serif;
-}
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,240,255,0.18); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,240,255,0.35); }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply font-sans antialiased bg-background text-foreground;
-  }
+  * { @apply border-border; }
+  body { @apply font-sans antialiased bg-background text-foreground; }
 }
 
+/* ── Glass cards ──────────────────────────────────────────── */
 .glass-card {
-  @apply bg-card/40 backdrop-blur-xl border border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)];
+  background: rgba(255,255,255,0.045);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 
+.glass-card-modal {
+  background: linear-gradient(145deg, #0b1020, #08101e);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* ── Gradient text ────────────────────────────────────────── */
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
 }
-
 .text-gradient-gold {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 via-amber-300 to-yellow-600;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500;
+}
+
+/* ── Section badge ────────────────────────────────────────── */
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 14px;
+}
+.section-badge::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn-primary {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(0,240,255,0.45) !important;
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.1) !important;
+  border-color: rgba(255,255,255,0.25) !important;
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes scrollDot {
+  0%,100% { transform: translateY(0); opacity: 1; }
+  50%      { transform: translateY(10px); opacity: 0.3; }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 20px rgba(0,240,255,0.3); }
+  50%      { box-shadow: 0 0 40px rgba(0,240,255,0.6); }
+}
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

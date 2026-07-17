@@ -2,35 +2,64 @@ import { motion } from 'framer-motion';
 
 export function BackgroundEffects() {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#03060d]">
-      {/* Deep space noise texture */}
-      <div 
-        className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
-        style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
-      />
-      
-      {/* Primary Cyan Glow */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.15, 0.25, 0.15],
+    <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: -1, background: '#03060d' }}>
+      {/* CSS grain texture — no external URL */}
+      <div style={{
+        position: 'absolute', inset: 0, opacity: 0.04,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'repeat',
+      }} />
+
+      {/* Top-left cyan glow */}
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], opacity: [0.18, 0.3, 0.18] }}
+        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute', top: '-15%', left: '-12%',
+          width: '55%', height: '55%', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,240,255,0.22) 0%, transparent 70%)',
+          filter: 'blur(60px)', mixBlendMode: 'screen',
         }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/20 blur-[120px] mix-blend-screen" 
       />
-      
-      {/* Secondary Purple Glow */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.3, 1],
-          opacity: [0.1, 0.2, 0.1],
+
+      {/* Bottom-right purple glow */}
+      <motion.div
+        animate={{ scale: [1, 1.35, 1], opacity: [0.12, 0.22, 0.12] }}
+        transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        style={{
+          position: 'absolute', bottom: '-22%', right: '-12%',
+          width: '65%', height: '65%', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(180,77,255,0.2) 0%, transparent 70%)',
+          filter: 'blur(80px)', mixBlendMode: 'screen',
         }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-secondary/15 blur-[150px] mix-blend-screen" 
       />
-      
-      {/* Central subtle ambient glow */}
-      <div className="absolute top-[40%] left-[50%] translate-x-[-50%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px] mix-blend-screen" />
+
+      {/* Bottom-left accent glow */}
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], opacity: [0.08, 0.16, 0.08] }}
+        transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 5 }}
+        style={{
+          position: 'absolute', bottom: '10%', left: '-5%',
+          width: '35%', height: '40%', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,240,255,0.14) 0%, transparent 70%)',
+          filter: 'blur(60px)', mixBlendMode: 'screen',
+        }}
+      />
+
+      {/* Center ambient */}
+      <div style={{
+        position: 'absolute', top: '35%', left: '50%', transform: 'translateX(-50%)',
+        width: '45%', height: '45%', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(60,80,160,0.12) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+      }} />
+
+      {/* Subtle grid overlay */}
+      <div style={{
+        position: 'absolute', inset: 0, opacity: 0.018,
+        backgroundImage: `linear-gradient(rgba(0,240,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,1) 1px, transparent 1px)`,
+        backgroundSize: '80px 80px',
+      }} />
     </div>
   );
 }
